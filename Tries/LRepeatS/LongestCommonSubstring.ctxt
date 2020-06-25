@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=
+comment0.target=LongestCommonSubstring()
+comment1.params=s\ p\ t\ q
+comment1.target=java.lang.String\ lcp(java.lang.String,\ int,\ java.lang.String,\ int)
+comment2.params=s\ p\ t\ q
+comment2.target=int\ compare(java.lang.String,\ int,\ java.lang.String,\ int)
+comment3.params=s\ t
+comment3.target=java.lang.String\ lcs(java.lang.String,\ java.lang.String)
+comment3.text=\r\n\ Returns\ the\ longest\ common\ string\ of\ the\ two\ specified\ strings.\r\n\r\n\ @param\ \ s\ one\ string\r\n\ @param\ \ t\ the\ other\ string\r\n\ @return\ the\ longest\ common\ string\ that\ appears\ as\ a\ substring\r\n\ \ \ \ \ \ \ \ \ in\ both\ {@code\ s}\ and\ {@code\ t};\ the\ empty\ string\r\n\ \ \ \ \ \ \ \ \ if\ no\ such\ string\r\n
+comment4.params=args
+comment4.target=void\ main(java.lang.String[])
+comment4.text=\r\n\ Unit\ tests\ the\ {@code\ lcs()}\ method.\r\n\ Reads\ in\ two\ strings\ from\ files\ specified\ as\ command-line\ arguments;\r\n\ computes\ the\ longest\ common\ substring;\ and\ prints\ the\ results\ to\r\n\ standard\ output.\r\n\r\n\ @param\ args\ the\ command-line\ arguments\r\n
+numComments=5

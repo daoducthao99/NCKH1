@@ -1,0 +1,179 @@
+https://stackoverflow.com/questions/46921301/java-implementation-of-aho-corasick-string-matching-algorithm
+
+Now I know there have been previous questions regarding this algorithm, however I honestly haven't come across a simple java implementation. Many people have copied and pasted the same code in their GitHub profiles, and its irritating me.
+
+So for the purpose of interview exercise, I've planned to set out and implement the algorithm using a different approach.
+
+The algorithm tend out to be very very challenging. I honestly am lost on how to go about it. The logic just doesn't make sense. I've nearly spent 4 days straight sketching the approach, but to no avail.
+
+Therefore please enlighten us with your wisdom.
+
+I'm primarily doing the algorithm based on this information Intuition behind the Aho-Corasick string matching algorithm
+
+It would be a big bonus if one can implement their own solution here.
+
+But here's the following incomplete and not working solution which I got really stuck at:
+
+If your overwhelemed with the code, the main problem lies at the main algorithm of Aho-Corasick. We already have created the trie tree of dictionaries well.
+
+But the issue is, that now that we have the trie strcuture, how do we actually start implementing.
+
+None of the resources were helpful.
+
+public class DeterminingDNAHealth {
+  private Trie tree;
+  private String[] dictionary;
+  private Node FailedNode;
+
+
+  private DeterminingDNAHealth() {
+
+  }
+
+  private void buildMatchingMachine(String[] dictionary) {
+    this.tree = new Trie();
+    this.dictionary = dictionary;
+
+    Arrays.stream(dictionary).forEach(tree::insert);
+
+  }
+
+  private void searchWords(String word, String[] dictionary) {
+
+    buildMatchingMachine(dictionary);
+
+    HashMap < Character, Node > children = tree.parent.getChildren();
+
+    String matchedString = "";
+
+ for (int i = 0; i < 3; i++) {
+      char C = word.charAt(i);
+
+      matchedString += C;
+
+      matchedChar(C, matchedString);
+
+    }
+
+  }
+
+  private void matchedChar(char C, String matchedString) {
+
+
+    if (tree.parent.getChildren().containsKey(C) && dictionaryContains(matchedString)) {
+
+      tree.parent = tree.parent.getChildren().get(C);
+
+    } else {
+
+      char suffix = matchedString.charAt(matchedString.length() - 2);
+
+      if (!tree.parent.getParent().getChildren().containsKey(suffix)) {
+        tree.parent = tree.parent.getParent();
+
+      }
+
+
+    }
+  }
+
+ private boolean dictionaryContains(String word) {
+
+    return Arrays.asList(dictionary).contains(word);
+
+  }
+
+
+  public static void main(String[] args) {
+
+    DeterminingDNAHealth DNA = new DeterminingDNAHealth();
+
+    DNA.searchWords("abccab", new String[] {
+      "a",
+      "ab",
+      "bc",
+      "bca",
+      "c",
+      "caa"
+    });
+
+
+  }
+}
+
+
+%%%%%%%%%%%
+
+
+I have setup a trie data structure which works fine. So no problem here
+
+trie.java
+
+public class Trie {
+  public Node parent;
+  public Node fall;
+
+  public Trie() {
+    parent = new Node('?');
+    parent.setParent(new Node());
+  }
+
+  public void insert(String word) {...}
+
+  private boolean delete(String word) {...}
+
+  public boolean search(String word) {...}
+
+  public Node searchNode(String word) {...}
+
+  public void printLevelOrderDFS(Node root) {...}
+
+  public static void printLevel(Node node, int level) {...}
+
+  public static int maxHeight(Node root) {...}
+
+  public void printTrie() {...}
+
+}
+
+Same thing for Node.
+
+Node.java
+
+public class Node {
+
+  private char character;
+  private Node parent;
+  private HashMap<Character, Node> children = new HashMap<Character, Node>();
+  private boolean leaf;
+
+  // default case
+  public Node() {}
+
+  // constructor accepting the character
+  public Node(char character) {
+    this.character = character;
+  }
+
+  public void setCharacter(char character) {...}
+
+  public char getCharacter() {...}
+
+  public void setParent(Node parent) {...}
+
+  public Node getParent() {...}
+
+ public HashMap<Character, Node> getChildren() {...}
+
+  public void setChildren(HashMap<Character, Node> children) {...}
+
+  public void resetChildren() {...}
+
+  public boolean isLeaf() {...}
+
+  public void setLeaf(boolean leaf) {...}
+}
+
+
+
+

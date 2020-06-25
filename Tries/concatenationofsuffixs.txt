@@ -1,0 +1,85 @@
+https:nput: str = “geeks”
+Output: sksekseeksgeeks//www.geeksforgeeks.org/concatenate-suffixes-of-a-string/
+
+Concatenate suffixes of a String
+Given a string str the task is to expand the string as follows:
+If the string is abcd, the resultant string will be d, cd, bcd and abcd in the concatenated form i.e. dcdbcdabcd. We basically need to concatenate all suffixes.
+
+Examples:
+
+
+Input str = “water”
+Output rerteraterwater
+
+Simple Approach:
+
+Iterate through the string in reverse order i.e. from the last index to the first.
+Print the sub-strings from the current index position till the end of the string.
+Below is the implementation of the above approach:
+
+// Java implementation of the approach  
+  
+public class  GFG { 
+  
+    // Function to print the expansion of the string  
+    static void printExpansion(String str)  
+    {  
+        for (int i = str.length() - 1; i >= 0; i--) {  
+      
+            // Take sub-string from i to n-1  
+            String subStr = str.substring(i);  
+      
+            // Print the sub-string  
+            System.out.print(subStr);  
+  
+        }  
+    }  
+  
+    // Driver code  
+    public static void main(String args[])   
+    {  
+        String str = "geeks";  
+        printExpansion(str);  
+      
+    }  
+    // This code is contributed by Ryuga 
+} 
+
+Output:
+sksekseeksgeeks
+
+Efficient Approach:
+Maintain a suffix string (which is initially empty). Keep traversing from end and keep appending current character.
+
+
+// Java implementation of the approach 
+import java.util.*; 
+  
+class solution 
+{ 
+  
+// Function to print the expansion of the string 
+static void printExpansion(String str) 
+{ 
+    String suff = ""; 
+    for (int i = str.length() - 1; i >= 0; i--) { 
+  
+        // Take sub-string from i to n-1 
+        suff = suff + str.charAt(i); 
+  
+        // Print the sub-string 
+        System.out.print(suff); 
+    } 
+} 
+
+// Driver code 
+public static void main(String args[]) 
+{ 
+    String str = "geeks"; 
+    printExpansion(str); 
+  
+} 
+} 
+
+Output:
+sskskeskeeskeeg

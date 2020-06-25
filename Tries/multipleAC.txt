@@ -1,0 +1,457 @@
+https://codereview.stackexchange.com/questions/115624/aho-corasick-for-multiple-exact-string-matching-in-java
+
+
+I have this program that compares performance of two algorithm for multiple exact string matching: Given a set of patterns and the text, find in the text all occurrences of any pattern. For example:
+
+Text:     habababa
+Patterns: aba, ha
+Above, aba occurs 3 times, and ha occurs one time (matches are allowed to overlap).
+
+The first algorithm is Aho-Corasick, and the other one is brute force.
+
+Note, however, that this implementations considers only a, b, c, ..., x, y, z to be the alphabet. Perhaps, I will address this limitation in later posts.
+
+AbstractMultipleExactStringMatcher.java:
+
+package net.coderodde.patternmatching;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * This interface defines the API for multiple exact string matching algorithms.
+ * 
+ * @author Rodion "rodde" Efremov
+ * @version 1.6 (Jan 1, 2016)
+ */
+public abstract class AbstractMultipleExactStringMatcher {
+
+    public abstract List<MatchingResult> match(String text, String... patterns);
+
+    protected String[] filterPatterns(String[] patterns) {
+        Set<String> filter = new HashSet<>(Arrays.asList(patterns));
+        return filter.toArray(new String[filter.size()]);
+    }
+
+    /**
+     * This class represents a match.
+	*/
+
+public static final class MatchingResult {
+
+        /**
+         * The index of the pattern being matched.
+         */
+        public final int patternIndex;
+
+        /**
+         * The index of the last character in a pattern indexed by
+         * {@code patternIndex}.
+         */
+        public final int concludingIndex;
+
+        public MatchingResult(int patternIndex, int concludingIndex) {
+            this.patternIndex = patternIndex;
+            this.concludingIndex = concludingIndex;
+        }
+
+        @Override
+
+ public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+
+            if (!getClass().equals(o.getClass())) {
+                return false;
+            }
+
+            MatchingResult arg = (MatchingResult) o;
+
+            return patternIndex == arg.patternIndex 
+                    && concludingIndex == arg.concludingIndex;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 5;
+            hash = 41 * hash + this.patternIndex;
+            hash = 41 * hash + this.concludingIndex;
+            return hash;
+        }
+
+        public String toString() {
+            return "(patternIndex = " + patternIndex + 
+                   ", concludingIndex = " + concludingIndex + ")";
+        }
+    }
+}
+
+
+AhoCorasickMatcher.java:
+
+
+package net.coderodde.patternmatching.support;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import net.coderodde.patternmatching.AbstractMultipleExactStringMatcher;
+
+/**
+ * This class implements Aho-Corasick algorithm for multiple exact string
+ * matching problem.
+ * 
+ * @author Rodion "rodde" Efremov
+ * @version 1.6 (Jan 1, 2016)
+ */
+
+public class AhoCorasickMatcher extends AbstractMultipleExactStringMatcher {
+
+    @Override
+    public List<MatchingResult> match(String text, String... patterns) {
+        if (patterns.length == 0) {
+            throw new IllegalArgumentException("No patterns given.");
+        }
+
+        patterns = filterPatterns(patterns);
+
+        Automaton data = constructACAutomaton(patterns);
+        TrieNode v = data.root;
+        int n = text.length();
+        List<MatchingResult> resultList = new ArrayList<>();
+
+        for (int j = 0; j < n; ++j) {
+            while (v.getChild(text.charAt(j)) == null) {
+                v = data.fail.get(v);
+            }
+
+            v = v.getChild(text.charAt(j));
+
+            for (Integer i : data.patterns.get(v)) {
+                resultList.add(new MatchingResult(i, j));
+            }
+        }
+        return resultList;
+    }
+
+private static final class TrieNode {
+
+        private final Map<Character, TrieNode> children = new HashMap<>();
+
+        void setChild(char character, TrieNode child) {
+            children.put(character, child);
+        }
+
+        TrieNode getChild(char character) {
+            return children.get(character);
+        }
+    }
+
+    private Automaton constructACAutomaton(String[] patterns) {
+        Automaton ret = new Automaton();
+        constructTrie(ret, patterns);
+        computeFailureFunction(ret);
+        return ret;
+    }
+
+private void constructTrie(Automaton automaton, String[] patterns) {
+        TrieNode root = new TrieNode();
+        int k = patterns.length;
+
+        for (int i = 0; i < k; ++i) {
+            TrieNode v = root;
+            int j = 0;
+            int patternLength = patterns[i].length();
+
+            while (j < patternLength 
+                    && v.getChild(patterns[i].charAt(j)) != null) {
+                v = v.getChild(patterns[i].charAt(j));
+                ++j;
+            }
+
+            while (j < patternLength) {
+                TrieNode u = new TrieNode();
+                v.setChild(patterns[i].charAt(j), u);
+                v = u;
+                ++j;
+            }
+
+            List<Integer> list = new ArrayList<>();
+            list.add(i);
+            automaton.patterns.put(v, list);
+        }
+        automaton.patterns.put(root, new ArrayList<>());
+        automaton.root = root;
+    }
+
+    private void computeFailureFunction(Automaton automaton) {
+        TrieNode fallbackNode = new TrieNode();
+
+        for (char c = 'a'; c <= 'z'; ++c) {
+            fallbackNode.setChild(c, automaton.root);
+        }
+
+        automaton.fail.put(automaton.root, fallbackNode);
+        Deque<TrieNode> queue = new ArrayDeque<>();
+        queue.addLast(automaton.root);
+
+        while (!queue.isEmpty()) {
+            TrieNode u = queue.removeFirst();
+
+            for (char c = 'a'; c <= 'z'; ++c) {
+                if (u.getChild(c) == null) {
+                    continue;
+                }
+
+                TrieNode v = u.getChild(c);
+                TrieNode w = automaton.fail.get(u);
+while (w.getChild(c) == null) {
+                    w = automaton.fail.get(w);
+                }
+
+                automaton.fail.put(v, w.getChild(c));
+
+                List<Integer> list = 
+                        automaton.patterns.get(automaton.fail.get(v));
+
+                if (automaton.patterns.get(v) == null) {
+                    automaton.patterns.put(v, list);
+                } else {
+                    automaton.patterns.get(v).addAll(list);
+                }
+
+                queue.addLast(v);
+            }
+        }
+
+        automaton.patterns.put(automaton.root, new ArrayList<>());
+    }
+
+    private static final class Automaton {
+        TrieNode root;
+        Map<TrieNode, TrieNode> fail = new HashMap<>();
+        Map<TrieNode, List<Integer>> patterns = new HashMap<>();
+    }
+}
+BruteForceMatcher.java:
+
+
+package net.coderodde.patternmatching.support;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.coderodde.patternmatching.AbstractMultipleExactStringMatcher;
+
+/**
+ * This class implements a brute force algorithm for solving multiple exact
+ * string matching problem.
+ * 
+ * @author Rodion "rodde" Efremov
+ * @version 1.6 (Jan 2, 2016)
+ */
+public class BruteForceMatcher extends AbstractMultipleExactStringMatcher {
+
+    @Override
+    public List<MatchingResult> match(String text, String... patterns) {
+        List<MatchingResult> ret = new ArrayList<>();
+
+        patterns = filterPatterns(patterns);
+
+        for (int i = 0; i < text.length(); ++i) {
+            for (int j = 0; j < patterns.length; ++j) {
+                MatchingResult result = tryMatch(text, patterns[j], i, j);
+
+                if (result != null) {
+                    ret.add(result);
+                }
+            }
+        }
+        return ret;
+    }
+
+    private MatchingResult tryMatch(String text, 
+                                    String pattern, 
+                                    int endIndex,
+                                    int patternIndex) {
+        int patternLength = pattern.length();
+
+        if (patternLength > endIndex + 1) {
+            return null;
+        }
+
+        int textCursor = endIndex;
+        int patternCursor = patternLength - 1;
+
+        while (patternCursor >= 0) {
+            if (text.charAt(textCursor) != pattern.charAt(patternCursor)) {
+                return null;
+            }
+
+            --textCursor;
+            --patternCursor;
+        }
+
+        return new MatchingResult(patternIndex, endIndex);
+    }
+}
+Utils.java:
+
+package net.coderodde.patternmatching;
+
+import java.util.Random;
+
+/**
+ * This class provides some miscellaneous utilities.
+ * 
+ * @author Rodion "rodde" Efremov
+ * @version 1.6 (Jan 2, 2016)
+ */
+public class Utils {
+
+    public static String getText(int size, Random random) {
+        StringBuilder sb = new StringBuilder(size);
+
+        for (int i = 0; i < size; ++i) {
+            sb.append(randomCharacter('a', 'b', random));
+        }
+
+        return sb.toString();
+    }
+
+    private static char randomCharacter(char a, char b, Random random) {
+        return (char)(a + (random.nextInt(b - a)));
+    }
+}
+
+PerformanceDemo.java:
+
+import java.util.HashSet;
+import net.coderodde.patternmatching.Utils;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import net.coderodde.patternmatching.AbstractMultipleExactStringMatcher.MatchingResult;
+import net.coderodde.patternmatching.support.AhoCorasickMatcher;
+import net.coderodde.patternmatching.support.BruteForceMatcher;
+
+public class PerformanceDemo {
+
+    public static void main(String[] args) {
+        long seed = System.nanoTime();
+        Random random = new Random(seed);
+        String text = Utils.getText(500_000, random);
+
+        System.out.println("Seed = " + seed);
+
+        String[] patterns = new String[]{
+            text.substring(1000, 1220),
+            text.substring(2000, 2225),
+            text.substring(2005, 2225),
+            text.substring(20000, 22025),
+            text.substring(22000, 22025),
+            text.substring(22060, 22100),
+        };
+     long startTime = System.nanoTime();
+        List<MatchingResult> result1 = 
+                new AhoCorasickMatcher().match(text, patterns);
+        long endTime = System.nanoTime();
+
+        System.out.printf("Aho-Corasick in %.2f milliseconds.\n",
+                          (endTime - startTime) / 1e6);
+
+        startTime = System.nanoTime();
+        List<MatchingResult> result2 = 
+                new BruteForceMatcher().match(text, patterns);
+        endTime = System.nanoTime();
+
+        System.out.printf("Brute force in %.2f milliseconds.\n",
+                          (endTime - startTime) / 1e6);
+
+        Set<MatchingResult> set1 = new HashSet<>(result1);
+        Set<MatchingResult> set2 = new HashSet<>(result2);
+
+        System.out.println("Same matches: " + set1.equals(set2));
+    }
+}
+
+
+MultipleExactStringMatcherTest.java:
+
+package net.coderodde.patternmatching;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import net.coderodde.patternmatching.AbstractMultipleExactStringMatcher.MatchingResult;
+import net.coderodde.patternmatching.support.AhoCorasickMatcher;
+import net.coderodde.patternmatching.support.BruteForceMatcher;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+public class MultipleExactStringMatcherTest {
+
+    private static final int ITERATIONS = 100;
+    private static final int TEXT_LENGTH = 100;
+    private static final int MAXIMUM_PATTERN_LENGTH = 30;
+    private static final int MAXIMUM_PATTERNS = 10;
+
+    @Test
+    public void testMatchers() {
+
+        AbstractMultipleExactStringMatcher matcher1 = new BruteForceMatcher();
+        AbstractMultipleExactStringMatcher matcher2 = new AhoCorasickMatcher();
+
+        Set<MatchingResult> set1 = new HashSet<>();
+        Set<MatchingResult> set2 = new HashSet<>();
+
+        long seed = System.nanoTime();
+        Random random = new Random(seed);
+
+        System.out.println("Seed = " + seed);
+
+        for (int iteration = 0; iteration < ITERATIONS; ++iteration) {
+            String text = Utils.getText(TEXT_LENGTH, random);
+
+String[] patterns = 
+                    new String[1 + random.nextInt(MAXIMUM_PATTERNS)];
+
+            for (int i = 0; i < patterns.length; ++i) {
+                int startIndex = random.nextInt(text.length());
+                int patternLength = 1 + random.nextInt(MAXIMUM_PATTERN_LENGTH);
+
+                String pattern = 
+                        text.substring(startIndex,
+                                       Math.min(text.length(), 
+                                                startIndex + patternLength));
+                patterns[i] = pattern;
+            }
+
+            set1.clear();
+            set2.clear();
+
+            set1.addAll(matcher1.match(text, patterns));
+            set2.addAll(matcher2.match(text, patterns));
+
+ if (!set1.equals(set2)) {
+                System.out.println("Set1: " + Arrays.toString(set1.toArray()));
+                System.out.println("Set2: " + Arrays.toString(set2.toArray()));
+            }
+
+            assertTrue(set1.equals(set2));
+        }
+    }
+}
+
+The performance figures I get:
+
+Seed = 44473779525966
+Aho-Corasick in 316.28 milliseconds.
+Brute force in 2635.01 milliseconds.
+Same matches: true

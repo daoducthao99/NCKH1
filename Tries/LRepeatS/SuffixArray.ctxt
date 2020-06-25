@@ -1,0 +1,27 @@
+#BlueJ class context
+comment0.params=text
+comment0.target=SuffixArray(java.lang.String)
+comment0.text=\r\n\ Initializes\ a\ suffix\ array\ for\ the\ given\ {@code\ text}\ string.\r\n\ @param\ text\ the\ input\ string\r\n
+comment1.params=
+comment1.target=int\ length()
+comment1.text=\r\n\ Returns\ the\ length\ of\ the\ input\ string.\r\n\ @return\ the\ length\ of\ the\ input\ string\r\n
+comment2.params=i
+comment2.target=int\ index(int)
+comment2.text=\r\n\ Returns\ the\ index\ into\ the\ original\ string\ of\ the\ <em>i</em>th\ smallest\ suffix.\r\n\ That\ is,\ {@code\ text.substring(sa.index(i))}\ is\ the\ <em>i</em>th\ smallest\ suffix.\r\n\ @param\ i\ an\ integer\ between\ 0\ and\ <em>n</em>-1\r\n\ @return\ the\ index\ into\ the\ original\ string\ of\ the\ <em>i</em>th\ smallest\ suffix\r\n\ @throws\ java.lang.IllegalArgumentException\ unless\ {@code\ 0\ <\=\ i\ <\ n}\r\n
+comment3.params=i
+comment3.target=int\ lcp(int)
+comment3.text=\r\n\ Returns\ the\ length\ of\ the\ longest\ common\ prefix\ of\ the\ <em>i</em>th\r\n\ smallest\ suffix\ and\ the\ <em>i</em>-1st\ smallest\ suffix.\r\n\ @param\ i\ an\ integer\ between\ 1\ and\ <em>n</em>-1\r\n\ @return\ the\ length\ of\ the\ longest\ common\ prefix\ of\ the\ <em>i</em>th\r\n\ smallest\ suffix\ and\ the\ <em>i</em>-1st\ smallest\ suffix.\r\n\ @throws\ java.lang.IllegalArgumentException\ unless\ {@code\ 1\ <\=\ i\ <\ n}\r\n
+comment4.params=s\ t
+comment4.target=int\ lcpSuffix(SuffixArray.Suffix,\ SuffixArray.Suffix)
+comment5.params=i
+comment5.target=java.lang.String\ select(int)
+comment5.text=\r\n\ Returns\ the\ <em>i</em>th\ smallest\ suffix\ as\ a\ string.\r\n\ @param\ i\ the\ index\r\n\ @return\ the\ <em>i</em>\ smallest\ suffix\ as\ a\ string\r\n\ @throws\ java.lang.IllegalArgumentException\ unless\ {@code\ 0\ <\=\ i\ <\ n}\r\n
+comment6.params=query
+comment6.target=int\ rank(java.lang.String)
+comment6.text=\r\n\ Returns\ the\ number\ of\ suffixes\ strictly\ less\ than\ the\ {@code\ query}\ string.\r\n\ We\ note\ that\ {@code\ rank(select(i))}\ equals\ {@code\ i}\ for\ each\ {@code\ i}\r\n\ between\ 0\ and\ <em>n</em>-1.\r\n\ @param\ query\ the\ query\ string\r\n\ @return\ the\ number\ of\ suffixes\ strictly\ less\ than\ {@code\ query}\r\n
+comment7.params=query\ suffix
+comment7.target=int\ compare(java.lang.String,\ SuffixArray.Suffix)
+comment8.params=args
+comment8.target=void\ main(java.lang.String[])
+comment8.text=\r\n\ Unit\ tests\ the\ {@code\ SuffixArray}\ data\ type.\r\n\r\n\ @param\ args\ the\ command-line\ arguments\r\n
+numComments=9

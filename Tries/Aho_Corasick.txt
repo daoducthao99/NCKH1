@@ -1,0 +1,218 @@
+https://www.sanfoundry.com/java-program-implement-aho-corasick-algorithm-string-matching/
+
+Java Program to Implement Aho-Corasick Algorithm for String Matching
+This is a java program to implement Aho-Corasick Algorithm. It is a kind of dictionary-matching algorithm that locates elements of a finite set of strings (the “dictionary”) within an input text. It matches all patterns simultaneously. The complexity of the algorithm is linear in the length of the patterns plus the length of the searched text plus the number of output matches. Note that because all matches are found, there can be a quadratic number of matches if every substring matches (e.g. dictionary = a, aa, aaa, aaaa and input string is aaaa).
+Here is the source code of the Java Program to Implement Aho-Corasick Algorithm for String Matching. The Java program is successfully compiled and run on a Windows system. The program output is also shown below.
+
+%%%%%%%%%%%%%%%%
+
+package com.sanfoundry.setandstring;
+ 
+
+import java.util.Arrays;
+import java.util.Scanner;
+ 
+public class StringSearchUsingAhoCorasickAlgo
+{
+    static final int ALPHABET_SIZE = 26;
+    Node[]           nodes;
+    int              nodeCount;
+ 
+    public static class Node
+    {
+        int     parent;
+        char    charFromParent;
+        int     suffLink    = -1;
+        int[]   children    = new int[ALPHABET_SIZE];
+        int[]   transitions = new int[ALPHABET_SIZE];
+        boolean leaf;
+        {
+            Arrays.fill(children, -1);
+            Arrays.fill(transitions, -1);
+        }
+    }
+ 
+    public StringSearchUsingAhoCorasickAlgo(int maxNodes)
+    {
+        nodes = new Node[maxNodes];
+        // create root
+        nodes[0] = new Node();
+        nodes[0].suffLink = 0;
+        nodes[0].parent = -1;
+        nodeCount = 1;
+    }
+ 
+    public void addString(String s)
+    {
+        int cur = 0;
+        for (char ch : s.toCharArray())
+        {
+            int c = ch - 'a';
+            if (nodes[cur].children[c] == -1)
+            {
+                nodes[nodeCount] = new Node();
+                nodes[nodeCount].parent = cur;
+                nodes[nodeCount].charFromParent = ch;
+                nodes[cur].children[c] = nodeCount++;
+            }
+            cur = nodes[cur].children[c];
+        }
+        nodes[cur].leaf = true;
+    }
+ 
+    public int suffLink(int nodeIndex)
+    {
+        Node node = nodes[nodeIndex];
+        if (node.suffLink == -1)
+            node.suffLink = node.parent == 0 ? 0 : transition(
+                    suffLink(node.parent), node.charFromParent);
+        return node.suffLink;
+    }
+ 
+    public int transition(int nodeIndex, char ch)
+    {
+        int c = ch - 'a';
+        Node node = nodes[nodeIndex];
+        if (node.transitions[c] == -1)
+            node.transitions[c] = node.children[c] != -1 ? node.children[c]
+                    : (nodeIndex == 0 ? 0 : transition(suffLink(nodeIndex), ch));
+        return node.transitions[c];
+    }
+ 
+    // Usage example
+    public static void main(String[] args)
+    {
+        StringSearchUsingAhoCorasickAlgo ahoCorasick = new StringSearchUsingAhoCorasickAlgo(
+                1000);
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the main string: ");
+        String main = sc.nextLine().toLowerCase().trim();
+        System.out.println("Enter the pattern string: ");
+        String pattern = sc.nextLine().toLowerCase().trim();
+        ahoCorasick.addString(pattern);
+        int node = 0;
+        for (char ch : main.toCharArray())
+        {
+            node = ahoCorasick.transition(node, ch);
+        }
+        if (ahoCorasick.nodes[node].leaf)
+            System.out.println("A '" + pattern + "' string is substring of "
+                    + main + " string.");
+        else
+            System.out.println("A '" + pattern
+                    + "' string is not substring of " + main + " string.");
+        sc.close();
+    }
+}
+Output:
+
+$ javac StringSearchUsingAhoCorasickAlgo.java
+$ java StringSearchUsingAhoCorasickAlgo
+ 
+Enter the main string: 
+Sanfoundry
+Enter the pattern string: 
+Asanfoundry
+A 'asanfoundry' string is not substring of sanfoundry string.
+Sanfoundry Global Education & Learning Series – 1000 Java Programs.
+
+Here’s the list of Best Reference Books in Java Programming, Data Structures and Algorithms.
+
+« Prev Page - Java Program to Implement the Program Used in grep/egrep/fgrep
+» Next Page - Java Program to Repeatedly Search the Same Text (such as Bible by building a Data Structure)
+   
+
+Deep Dive @ Sanfoundry:
+Java Programming Examples on Data-Structures
+Java Programming Examples on Computational Geometry Problems & Algorithms
+Java Programming Examples on Graph Problems & Algorithms
+Java Algorithms, Problems & Programming Examples
+C Programming Examples using Recursion
+C++ Programming Examples on Set & String Problems & Algorithms
+C Programming Examples on Set & String Problems & Algorithms
+Java Programming Examples on Collection API
+C Programming Examples without using Recursion
+C Programming Examples on Trees
+
+Manish Bhojasia
+Manish Bhojasia
+Founder & CTO
+SanfoundrySanfoundry
+View profileLinkedIn
+Manish Bhojasia, a technology veteran with 20+ years @ Cisco & Wipro, is Founder and CTO at Sanfoundry. He is Linux Kernel Developer & SAN Architect and is passionate about competency developments in these areas. He lives in Bangalore and delivers focused training sessions to IT professionals in Linux Kernel, Linux Debugging, Linux Device Drivers, Linux Networking, Linux Storage, Advanced C Programming, SAN Storage Technologies, SCSI Internals & Storage Protocols such as iSCSI & Fiber Channel. Stay connected with him @ LinkedIn | Facebook | Twitter
+Best Careers
+Developer Tracks
+SAN Developer
+Linux Kernel Developer
+Linux Driver Developer
+Linux Network Developer
+
+Live Training Photos
+Mentoring
+Software Productivity
+GDB Assignment
+
+Sanfoundry is No. 1 choice for Deep Hands-ON Trainings in SAN, Linux & C, Kernel Programming. Our Founder has trained employees of almost all Top Companies in India such as VMware, Citrix, Oracle, Motorola, Ericsson, Aricent, HP, Intuit, Microsoft, Cisco, SAP Labs, Siemens, Symantec, Redhat, Chelsio, Cavium, ST-Micro, Samsung, LG-Soft, Wipro, TCS, HCL, IBM, Accenture, HSBC, Mphasis, Tata-Elxsi, Tata VSNL, Mindtree, Cognizant and Startups.
+
+Best Trainings
+SAN I - Technology
+SAN II - Admin
+Linux Fundamentals
+Advanced C Training
+Linux-C Debugging
+System Programming
+Network Programming
+Linux Threads
+Kernel Programming
+Kernel Debugging
+Linux Device Drivers
+
+Best Reference Books
+Computer Science Books
+Algorithm & Programming Books
+Electronics Engineering Books
+Electrical Engineering Books
+Chemical Engineering Books
+Civil Engineering Books
+Mechanical Engineering Books
+Industrial Engineering Books
+Instrumentation Engg Books
+Metallurgical Engineering Books
+All Stream Best Books
+Questions and Answers
+1000 C Questions & Answers
+1000 C++ Questions & Answers
+1000 C# Questions & Answers
+1000 Java Questions & Answers
+1000 Linux Questions & Answers
+1000 Python Questions
+1000 PHP Questions & Answers
+1000 Hadoop Questions
+Cloud Computing Questions
+Computer Science Questions
+All Stream Questions & Answers
+India Internships
+Computer Science Internships
+Instrumentation Internships
+Electronics Internships
+Electrical Internships
+Mechanical Internships
+Industrial Internships
+Systems Internships
+Chemical Internships
+Civil Internships
+IT Internships
+All Stream Internships
+About Sanfoundry
+About Us
+Copyright
+Terms
+Privacy Policy
+Jobs
+Bangalore Training
+Online Training
+Developers Track
+Mentoring Sessions
+Contact Us
+Sitemap
+© 2011-2019 Sanfoundry. All Rights Reserved.
